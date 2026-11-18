@@ -1,0 +1,8 @@
+name: Extension popup
+tests:
+  - name: Popup counter works
+    steps:
+      - goto: "chrome-extension://{{extensionId}}/popup.html"
+      - expectText: { selector: "#hello", text: "Hello from the extension" }
+      - click: "#b"
+      - expectText: { selector: "#n", text: "1" }

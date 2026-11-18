@@ -1,0 +1,2 @@
+{ "manifest_version": 3, "name": "IronProbe demo extension", "version": "1.0",
+  "action": { "default_popup": "popup.html" }, "background": { "service_worker": "background.js" } }

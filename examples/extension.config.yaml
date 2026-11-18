@@ -1,0 +1,10 @@
+name: Demo extension
+baseUrl: http://localhost:4010
+allowedHosts: [localhost]
+output: ironprobe-report-extension
+ui:
+  browsers: [chromium]
+  devices: [Desktop]
+  extension: ./extension
+  suites: [tests/extension.yaml]
+  a11y: false

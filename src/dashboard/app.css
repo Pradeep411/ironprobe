@@ -1,0 +1,264 @@
+/* IronProbe dashboard. Design direction: a precision inspection instrument.
+   One bold element (the calibrated gauge); everything else is quiet steel and graphite.
+   The result is the peak, so the needle settling on the score is the one motion moment. */
+@font-face { font-family: "Plex Sans"; src: url("/fonts/plex-sans-400.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Plex Sans"; src: url("/fonts/plex-sans-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Plex Condensed"; src: url("/fonts/plex-condensed-600.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+
+:root {
+  --font-body: "Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Plex Condensed", "Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --steel: #e9edf0;
+  --grid-line: rgba(28, 35, 41, 0.045);
+  --panel: #ffffff;
+  --graphite: #1c2329;
+  --ink-2: #3a444d;
+  --muted: #56616b;
+  --line: #d3d9de;
+  --signal: #f5c518;
+  --signal-ink: #1c2329;
+  --good: #1e7a46; --warn: #8a5a00; --bad: #b3261e;
+  --good-arc: #2a9d5c; --warn-arc: #e0a100; --bad-arc: #d64035;
+  --face: #f7f9fa; --tick: #8a959e; --edge: #7a858f; --hole-shade: #bac3ca; --hole-ring: #f1f4f6;
+  --focus: #1c2329;
+  --shadow: 0 1px 0 rgba(28,35,41,.06), 0 10px 30px -12px rgba(28,35,41,.25);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --steel: #12171b; --grid-line: rgba(232, 236, 239, 0.035); --panel: #1b2228;
+    --graphite: #e8ecef; --ink-2: #c3ccd3; --muted: #9aa6b0; --line: #2d363e;
+    --signal: #f5c518; --signal-ink: #12171b;
+    --good: #5cc98a; --warn: #f0b552; --bad: #ff7a70;
+    --good-arc: #4cc27c; --warn-arc: #e8a93a; --bad-arc: #ff6b5f;
+    --face: #161c21; --tick: #6e7a84; --edge: #7d8994; --hole-shade: #0a0e11; --hole-ring: #222a31; --focus: #f5c518;
+    --shadow: 0 10px 30px -12px rgba(0,0,0,.6);
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { overflow-x: clip; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; color: var(--graphite); font-family: var(--font-body); font-size: 16px; line-height: 1.55;
+  background-color: var(--steel);
+  /* calibration grid, like the paper an inspector works on */
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+h1, h2 { font-family: var(--font-display); font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(38px, 6vw, 60px); line-height: 1.02; margin-bottom: 14px; }
+h2 { font-size: 24px; line-height: 1.1; margin: 36px 0 14px; }
+p { margin: 0; }
+code { font-family: var(--font-mono); font-size: 0.88em; background: var(--panel); border: 1px solid var(--line); padding: 1px 6px; border-radius: 6px; }
+kbd { font-family: var(--font-mono); font-size: 12px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 1px 6px; background: var(--panel); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; border-radius: 6px; }
+#resLabel:focus { outline: none; }
+input::placeholder { color: var(--muted); opacity: 1; }
+
+/* ---------- header ---------- */
+.top { max-width: 1120px; margin: 0 auto; padding: 22px 20px; display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.brand { display: flex; gap: 10px; align-items: center; color: var(--graphite); text-decoration: none; font-family: var(--font-display); font-size: 22px; font-weight: 600; }
+.brand-mark { width: 32px; height: 32px; }
+.brand-mark { overflow: visible; }
+/* the mark is a fixed object: graphite tile, yellow arc, white needle, in both themes */
+.brand-mark rect { fill: #1c2329; stroke: var(--line); stroke-width: 1; }
+.brand-arc { fill: none; stroke: var(--signal); stroke-width: 3; stroke-linecap: round; }
+.brand-needle { stroke: #fff; stroke-width: 2.5; stroke-linecap: round; }
+.trust { font-size: 14px; color: var(--ink-2); display: flex; gap: 8px; align-items: center; }
+.trust::before { content: ""; width: 14px; height: 14px; flex: none; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5z'/%3E%3C/svg%3E") center / contain no-repeat; }
+
+/* ---------- layout: work area + instrument ---------- */
+.stage { max-width: 1120px; margin: 0 auto; padding: 8px 20px 56px; }
+.bench { display: grid; grid-template-columns: minmax(0, 1fr) 360px; grid-template-rows: auto 1fr; column-gap: 56px; row-gap: 0; align-items: start; padding-top: 28px; }
+.work, .detail { grid-column: 1; min-width: 0; max-width: 640px; }
+.work { grid-row: 1; }
+.detail { grid-row: 2; }
+.lede { font-size: 18px; color: var(--ink-2); max-width: 56ch; }
+.panel { padding-top: 48px; max-width: 600px; }
+.panel p { color: var(--ink-2); font-size: 18px; }
+
+/* the probe: input and action fused into one instrument bar */
+.probe { margin-top: 28px; display: flex; background: var(--panel); border: 2px solid var(--graphite); border-radius: 14px; padding: 6px; box-shadow: var(--shadow); }
+/* focus: a solid ring (13:1 light, 11:1 dark) around a signal-yellow band */
+.probe:focus-within { outline: 3px solid var(--focus); outline-offset: 3px; box-shadow: 0 0 0 3px var(--signal), var(--shadow); }
+.probe:has(.go:focus-visible) { outline: none; box-shadow: var(--shadow); }
+.probe input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--graphite); font-family: var(--font-body); font-size: 20px; padding: 12px 14px; outline: none; }
+.go { appearance: none; border: 0; background: var(--signal); color: var(--signal-ink); font-family: var(--font-display); font-size: 20px; font-weight: 600; line-height: 1; padding: 0 26px; border-radius: 9px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; min-height: 54px; white-space: nowrap; transition: transform .12s ease, filter .12s ease; }
+.go:hover { filter: brightness(1.05); }
+.go:active { transform: translateY(1px); }
+.go:disabled { opacity: .6; cursor: progress; }
+.ghost { appearance: none; background: var(--panel); color: var(--graphite); border: 1.5px solid var(--edge); font-family: var(--font-body); font-size: 15px; font-weight: 600; line-height: 1; padding: 0 18px; border-radius: 9px; cursor: pointer; min-height: 48px; }
+.ghost:hover { border-color: var(--graphite); }
+.link { appearance: none; background: none; border: 0; color: var(--graphite); font-family: var(--font-body); font-size: 15px; font-weight: 600; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--signal); text-decoration-thickness: 2px; cursor: pointer; padding: 12px 4px; min-height: 48px; }
+.error { color: var(--bad); margin-top: 12px; font-weight: 600; }
+.hint { margin-top: 12px; color: var(--muted); font-size: 14px; }
+
+.drop { margin-top: 26px; display: grid; grid-template-columns: 28px 1fr; gap: 4px 14px; align-items: start; border: 1.5px dashed color-mix(in srgb, var(--graphite) 30%, transparent); border-radius: 14px; padding: 16px 18px; cursor: pointer; background: color-mix(in srgb, var(--panel) 60%, transparent); transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--graphite); background: var(--panel); }
+.drop-icon { width: 24px; height: 24px; margin-top: 2px; fill: none; stroke: var(--graphite); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.files { grid-column: 1 / -1; list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.files:empty { display: none; }
+.files li { display: inline-flex; gap: 4px; align-items: center; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 0 0 0 12px; font-size: 14px; }
+.files button { appearance: none; border: 0; background: transparent; color: var(--muted); width: 44px; height: 44px; border-radius: 6px; cursor: pointer; font-size: 18px; }
+.files button:hover { background: var(--steel); color: var(--graphite); }
+
+.more { margin-top: 16px; }
+.more summary { cursor: pointer; color: var(--ink-2); font-weight: 600; font-size: 15px; padding: 11px 0; min-height: 44px; width: max-content; }
+.opts { display: grid; gap: 8px; padding: 4px 0; max-width: 480px; }
+.opts label { font-size: 14px; color: var(--ink-2); }
+.opts select, .opts input[type=password] { font-family: var(--font-body); font-size: 16px; color: var(--graphite); background: var(--panel); border: 1.5px solid var(--line); border-radius: 9px; padding: 10px 12px; min-height: 48px; }
+.check { display: flex; gap: 10px; align-items: center; min-height: 44px; }
+.check input { flex: none; width: 20px; height: 20px; accent-color: var(--graphite); }
+
+/* ---------- the instrument ---------- */
+.dial { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 22px 22px 18px; box-shadow: var(--shadow); }
+.gauge svg { display: block; width: 100%; height: auto; }
+.gauge .face { fill: var(--face); stroke: var(--line); stroke-width: 1; }
+.gauge .band { fill: none; stroke-width: 8; }
+.gauge .band.bad { stroke: var(--bad-arc); }
+.gauge .band.warn { stroke: var(--warn-arc); }
+.gauge .band.good { stroke: var(--good-arc); }
+.gauge .tick { stroke: var(--tick); stroke-width: 1.2; }
+.gauge .tick.major { stroke: var(--graphite); stroke-width: 2; }
+.gauge .num-label { fill: var(--muted); font-family: var(--font-body); font-size: 11px; text-anchor: middle; }
+.gauge .needle { transform-origin: 120px 128px; transition: transform 1.4s cubic-bezier(.2,.9,.25,1.05); }
+.gauge .needle path { fill: var(--graphite); }
+.gauge .hub { fill: var(--graphite); }
+.gauge .hub-cap { fill: var(--signal); }
+.gauge .readout { fill: var(--graphite); font-family: var(--font-display); font-weight: 600; font-size: 46px; text-anchor: middle; font-variant-numeric: tabular-nums; }
+.gauge .readout-unit { fill: var(--muted); font-family: var(--font-body); font-size: 12px; text-anchor: middle; }
+.gauge.idle .band { opacity: .28; }
+.gauge.scanning .needle { transition: transform .9s ease-in-out; }
+.gauge-caption { text-align: center; margin-top: 6px; font-family: var(--font-display); font-size: 20px; font-weight: 600; }
+.gauge-caption.good { color: var(--good); }
+.gauge-caption.warn { color: var(--warn); }
+.gauge-caption.bad { color: var(--bad); }
+
+/* ---------- running ---------- */
+.running h1 { overflow-wrap: anywhere; }
+.bar { height: 8px; background: color-mix(in srgb, var(--graphite) 10%, transparent); border-radius: 99px; overflow: hidden; margin: 22px 0 16px; }
+.bar span { display: block; height: 100%; width: 4%; background: var(--graphite); border-radius: 99px; transition: width .4s ease; }
+.counts { display: flex; gap: 28px; flex-wrap: wrap; color: var(--ink-2); }
+.num { font-family: var(--font-display); font-weight: 600; font-variant-numeric: tabular-nums; color: var(--graphite); font-size: 26px; margin-right: 4px; }
+.num.has-fails { color: var(--bad); }
+.feed { list-style: none; padding: 0; margin: 18px 0 0; font-size: 15px; color: var(--ink-2); max-height: 320px; overflow: auto; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.feed:empty { display: none; }
+.feed li { padding: 9px 14px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; display: grid; grid-template-columns: 22px 1fr; }
+.feed li:last-child { border-bottom: 0; }
+.feed .mark-ok { color: var(--good); font-weight: 700; }
+.feed .mark-bad { color: var(--bad); font-weight: 700; }
+.stop { margin-top: 18px; }
+
+/* ---------- result ---------- */
+.result h1 { margin-bottom: 4px; }
+.site-line { font-family: var(--font-display); font-size: 22px; color: var(--ink-2); overflow-wrap: anywhere; }
+.result .lede { margin-top: 10px; }
+.delta { display: inline-block; margin-top: 14px; font-weight: 600; font-size: 14px; border-radius: 8px; padding: 5px 10px; background: var(--panel); border: 1px solid var(--line); color: var(--ink-2); }
+.delta.up { color: var(--good); border-color: color-mix(in srgb, var(--good) 40%, var(--line)); }
+.delta.down { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 40%, var(--line)); }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 24px; }
+.actions .go { min-height: 50px; font-size: 18px; padding: 0 22px; }
+
+/* area readouts: like an instrument's sub-dials */
+.parts { display: grid; grid-template-columns: repeat(auto-fill, minmax(154px, 1fr)); gap: 10px; margin-top: 26px; }
+.readout-card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px 13px; }
+.rc-value { font-family: var(--font-display); font-weight: 600; font-size: 26px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.rc-name { color: var(--muted); font-size: 14px; }
+.rc-bar { height: 4px; border-radius: 4px; background: var(--steel); margin-top: 8px; overflow: hidden; }
+.rc-bar span { display: block; height: 100%; background: var(--good-arc); }
+.rc-bar.partial span { background: var(--warn-arc); }
+.rc-bar.none span { background: var(--bad-arc); }
+
+.login-note { margin-top: 20px; background: var(--panel); border: 1px solid var(--line); border-left: 5px solid var(--signal); border-radius: 10px; padding: 12px 14px; color: var(--ink-2); }
+
+/* fix list: inspection tags. Both end corners are cut and the cut edges are drawn; the hole is drawn
+   with depth (shadowed upper edge) inside a reinforcement ring. */
+.fix { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
+.fix li {
+  --cut: 16px; --hole-x: calc(100% - 25px);
+  position: relative; background: var(--panel); border: 1px solid var(--line); border-left: 6px solid var(--bad-arc);
+  border-radius: 10px 0 0 10px; padding: 14px 56px 14px 18px; min-height: 68px;
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%);
+}
+/* the two cut edges, drawn in the border colour just inside the clip */
+.fix li::before {
+  content: ""; position: absolute; top: -1px; bottom: -1px; right: -1px; width: var(--cut); pointer-events: none;
+  background:
+    linear-gradient(to top right, transparent calc(50% - 1.6px), var(--line) calc(50% - 1.2px), var(--line) 50%, var(--line) 100%) top / var(--cut) var(--cut) no-repeat,
+    linear-gradient(to bottom right, transparent calc(50% - 1.6px), var(--line) calc(50% - 1.2px), var(--line) 50%, var(--line) 100%) bottom / var(--cut) var(--cut) no-repeat;
+}
+/* the punched hole: the bench shows through, the upper edge is in shadow, a pale reinforcement ring around it */
+.fix li::after {
+  content: ""; position: absolute; left: var(--hole-x); top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 58%, var(--steel) 5px, transparent 6.5px),
+    radial-gradient(circle, var(--hole-shade) 6px, var(--edge) 6.4px, var(--edge) 7px, var(--hole-ring) 7.6px, var(--hole-ring) 12px, var(--line) 12.5px, var(--line) 13px);
+}
+.fix li.test, .fix li.infrastructure, .fix li.login { border-left-color: var(--warn-arc); }
+.fix a { color: inherit; text-decoration: none; }
+.fix a:hover { text-decoration: underline; text-decoration-color: var(--signal); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.fix .what { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
+.fix .why { color: var(--ink-2); margin-top: 4px; overflow-wrap: anywhere; }
+.fix .meta { color: var(--muted); font-size: 14px; margin-top: 6px; overflow-wrap: anywhere; }
+.tag { display: inline-block; font-size: 12px; font-weight: 600; border-radius: 5px; padding: 1px 8px; margin-right: 8px; vertical-align: 2px; background: color-mix(in srgb, var(--bad) 10%, transparent); color: var(--bad); }
+.test .tag, .infrastructure .tag, .login .tag { background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--warn); }
+.good { margin-top: 14px; color: var(--good); font-weight: 600; font-size: 18px; }
+.warnings { margin: 22px 0 0; padding-left: 18px; color: var(--muted); font-size: 14px; }
+
+/* ---------- history: an inspection log ---------- */
+.history { margin-top: 64px; }
+.history h2 { margin-top: 0; }
+.sites { list-style: none; padding: 0; margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+.sites:empty { display: none; }
+.sites li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 16px; align-items: start; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+.sites li:last-child { border-bottom: 0; }
+.pill { font-family: var(--font-display); font-weight: 600; font-size: 22px; font-variant-numeric: tabular-nums; text-align: center; border-radius: 10px; padding: 8px 0; background: color-mix(in srgb, var(--good) 11%, transparent); color: var(--good); }
+.pill.mid { background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--warn); }
+.pill.low { background: color-mix(in srgb, var(--bad) 10%, transparent); color: var(--bad); }
+.pill.none { background: var(--steel); color: var(--ink-2); }
+.sites .name { font-weight: 600; font-size: 17px; overflow-wrap: anywhere; }
+.spark { display: block; width: 110px; height: 26px; }
+.spark polyline { fill: none; stroke: var(--graphite); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.spark-row { display: flex; gap: 8px; align-items: center; color: var(--muted); font-size: 13px; margin-top: 4px; }
+.sites a { color: var(--graphite); font-weight: 600; text-decoration: underline; text-decoration-color: var(--signal); text-decoration-thickness: 2px; text-underline-offset: 4px; font-size: 15px; padding: 0 4px; min-height: 44px; display: inline-flex; align-items: center; }
+.foot { max-width: 1120px; margin: 0 auto; padding: 0 20px 36px; color: var(--muted); font-size: 14px; }
+
+/* ---------- small screens ---------- */
+@media (max-width: 900px) {
+  /* the verdict leads; the dial sits beside it as a compact instrument */
+  .bench { grid-template-columns: minmax(0, 1fr) 232px; column-gap: 28px; }
+  .work, .detail { max-width: none; }
+  .detail { grid-column: 1 / -1; }
+  .dial { position: static; grid-row: 1; padding: 12px 12px 8px; border-radius: 18px; }
+  .bench.is-result .gauge-caption { display: none; } /* the headline already says it */
+  .bench.is-result .dial { padding-bottom: 12px; }
+  .bench.is-start .dial { display: none; }
+  .bench.is-start .work { grid-column: 1 / -1; max-width: 640px; }
+  .bench.is-running { grid-template-columns: minmax(0, 1fr); }
+  .bench.is-running .dial { grid-column: 1; grid-row: 1; width: 100%; max-width: 260px; margin-bottom: 24px; }
+  .bench.is-running .work { grid-row: 2; }
+}
+@media (max-width: 599px) {
+  .bench { grid-template-columns: minmax(0, 1fr); }
+  .bench.is-result .dial { grid-column: 1; grid-row: 2; width: 100%; margin-top: 24px; }
+  .bench.is-result .gauge { max-width: 220px; margin: 0 auto; }
+  .bench.is-result .detail { grid-row: 3; }
+  .probe { flex-direction: column; gap: 6px; }
+  .probe .go { width: 100%; }
+  .actions .go, .actions .ghost { flex: 1 1 auto; }
+  .sites li { grid-template-columns: 52px minmax(0, 1fr); }
+  .sites li a { grid-column: 2; justify-self: start; margin-top: -8px; }
+  .fix li { padding-right: 48px; }
+  h2 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* No score (stopped early or could not finish): the needle fades so it does not read as zero. */
+.gauge.noscore .needle,.gauge.noscore .hub{opacity:.18}

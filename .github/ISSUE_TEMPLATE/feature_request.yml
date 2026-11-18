@@ -1,0 +1,11 @@
+name: Feature request
+description: Something you still pay another tool for
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: Which testing job should IronProbe do for you?
+      description: Tell us the tool you use for it today and what annoys you about it.
+    validations:
+      required: true

@@ -1,0 +1,72 @@
+{
+  "name": "ironprobe",
+  "version": "0.1.0",
+  "description": "Free, open-source BrowserStack and Postman alternative: test any website or API in one command. Cross-browser and mobile UI tests, API tests (Postman, OpenAPI, HAR), fuzzing, accessibility, Web Vitals, visual diffs and load tests, with a health score and a fix-first report. Runs locally.",
+  "type": "module",
+  "bin": {
+    "ironprobe": "bin/ironprobe.js"
+  },
+  "main": "src/index.js",
+  "files": [
+    "bin/",
+    "src/",
+    "plugin/",
+    "README.md",
+    "ARCHITECTURE.md",
+    "SECURITY.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "demo": "node examples/demo-app/server.js"
+  },
+  "keywords": [
+    "testing",
+    "test-automation",
+    "qa",
+    "e2e",
+    "api-testing",
+    "browser-testing",
+    "cross-browser",
+    "cross-browser-testing",
+    "mobile-testing",
+    "playwright",
+    "postman",
+    "postman-alternative",
+    "browserstack-alternative",
+    "openapi",
+    "har",
+    "fuzzing",
+    "accessibility",
+    "wcag",
+    "web-vitals",
+    "visual-regression",
+    "load-testing",
+    "cli",
+    "developer-tools",
+    "ai-agent",
+    "claude-code"
+  ],
+  "license": "MIT",
+  "author": "IronProbe authors",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Pradeep411/ironprobe.git"
+  },
+  "homepage": "https://github.com/Pradeep411/ironprobe#readme",
+  "bugs": {
+    "url": "https://github.com/Pradeep411/ironprobe/issues"
+  },
+  "dependencies": {
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "axe-core": "4.14.1",
+    "pixelmatch": "7.1.0",
+    "playwright": "1.63.0",
+    "pngjs": "7.0.0",
+    "yaml": "2.9.1"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+ironprobe-report*/
+**/artifacts/
+playwright-tests/
+*.zip
+.DS_Store
+*.log
+examples/.ironprobe/
+*.out

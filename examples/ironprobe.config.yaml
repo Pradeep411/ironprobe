@@ -1,0 +1,35 @@
+name: Demo app
+baseUrl: http://localhost:4010
+allowedHosts: [localhost, 127.0.0.1]
+iOwnThisTarget: true
+secretEnv: [DEMO_PASS]
+
+api:
+  - file: tests/api.yaml
+  - postman: demo.postman_collection.json
+  - openapi: openapi.yaml
+    fuzz: true            # edge-case inputs must never cause a 5xx
+    headers: { Authorization: "Bearer {{token}}" }
+
+ui:
+  browsers: [chromium, firefox, webkit]
+  devices: [Desktop, "iPhone 15", "Pixel 7"]
+  suites: [tests/ui.yaml]
+  pages: [/, /items, /about]
+  a11y: true
+  visual: true
+  visualInfoOnly: true      # a changed look is reported as a note and becomes the new look
+  visualPages: [/, /about]   # /items has live data, so it is checked functionally, not by screenshot
+  perf:
+    budgets: { LCP: 2500, CLS: 0.1, FCP: 1800, TTFB: 800 }
+
+crawl:
+  start: /
+  maxPages: 10
+
+load:
+  url: /api/health
+  concurrency: 10
+  durationSec: 8
+  maxRps: 80
+  thresholds: { p95: 200, errorRate: 0.01 }

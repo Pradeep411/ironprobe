@@ -1,0 +1,25 @@
+name: Demo UI
+tests:
+  - name: Add an item
+    steps:
+      - goto: /items
+      - fill: { selector: "#name", value: "Projection dome" }
+      - click: "#add"
+      - expectText: { selector: "#list", text: "Projection dome" }
+      - screenshot: item-added
+
+  - name: Added item is really saved (outcome check)
+    retries: 0
+    steps:
+      - goto: /items
+      - fill: { selector: "#name", value: "Saved dome" }
+      - click: "#add"
+      - reload: true
+      - expectText: { selector: "#list", text: "Saved dome" }
+
+  - name: Navigate to About
+    steps:
+      - goto: /
+      - click: "text=About"
+      - expectUrl: /about$
+      - expectTitle: About

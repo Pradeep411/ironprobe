@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IronProbe</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231c2329'/%3E%3Cpath d='M7 22a9 9 0 0 1 18 0' fill='none' stroke='%23f5c518' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M16 22 22 12' stroke='%23fff' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preload" href="/fonts/plex-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/app.css">
+<script src="/app.js" defer></script>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/" aria-label="IronProbe home">
+    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7"/><path class="brand-arc" d="M7 22a9 9 0 0 1 18 0"/><path class="brand-needle" d="M16 22 22 12"/></svg>
+    <span>IronProbe</span>
+  </a>
+  <p class="trust">Runs on this computer. Nothing is uploaded.</p>
+</header>
+
+<main class="stage">
+  <noscript><section class="panel"><h1>Turn on JavaScript</h1><p>The IronProbe dashboard needs JavaScript. Everything stays on this computer.</p></section></noscript>
+
+  <section id="locked" class="panel" hidden>
+    <h1>This page needs its private link</h1>
+    <p>In your terminal, run <code>npx ironprobe</code> and open the link it prints. The link changes each time, so other websites cannot use this dashboard.</p>
+  </section>
+
+  <div class="bench" id="bench" hidden>
+    <div class="work">
+      <section id="start" class="start" aria-labelledby="ask" hidden>
+        <h1 id="ask">What should we test?</h1>
+        <p class="lede">Paste a link. IronProbe opens every page on a laptop and a phone, checks your API, and tells you what to fix first.</p>
+        <form id="form" class="probe" autocomplete="off" novalidate>
+          <label class="sr" for="url">Address of your site or app</label>
+          <input id="url" name="url" type="text" inputmode="url" spellcheck="false" placeholder="myapp.com" required>
+          <button id="go" type="submit" class="go">Test it</button>
+        </form>
+        <p id="formError" class="error" role="alert" hidden></p>
+        <p class="hint">Local apps work too, like <code>localhost:3000</code>. Press <kbd>Enter</kbd> to start.</p>
+
+        <div id="drop" class="drop" tabindex="0" role="button" aria-describedby="dropHelp">
+          <input id="file" type="file" multiple accept=".json,.yaml,.yml,.har" hidden>
+          <svg class="drop-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+          <div>
+            <p><strong>Add API files</strong> <span class="muted">(optional)</span></p>
+            <p id="dropHelp" class="muted small">Postman collection or environment, OpenAPI / Swagger spec, or a HAR recording from your browser.</p>
+          </div>
+          <ul id="files" class="files"></ul>
+        </div>
+
+        <details class="more">
+          <summary>Options</summary>
+          <div class="opts">
+            <label class="check"><input id="allBrowsers" type="checkbox"> Also test the Firefox and Safari engines (slower)</label>
+            <label class="check"><input id="allowWrites" type="checkbox"> Also run API requests that change data (only on test servers)</label>
+            <label for="network">Network</label>
+            <select id="network">
+              <option value="">Normal</option>
+              <option value="4g">4G</option>
+              <option value="slow-4g">Slow 4G</option>
+              <option value="3g-india">3G (India)</option>
+            </select>
+            <label for="auth">API token <span class="muted">(only if your API files need a login; kept in memory)</span></label>
+            <input id="auth" type="password" autocomplete="off" spellcheck="false" placeholder="Bearer eyJ... or just the token">
+          </div>
+        </details>
+      </section>
+
+      <section id="running" class="running" hidden aria-live="polite">
+        <h1 id="runTitle">Testing your site</h1>
+        <p id="stage" class="lede">Getting ready…</p>
+        <div class="bar" role="progressbar" aria-label="Test progress" aria-valuemin="0" aria-valuemax="100"><span id="barFill"></span></div>
+        <div class="counts" id="counts" hidden>
+          <p><span id="cPass" class="num">0</span> passed</p>
+          <p><span id="cFail" class="num">0</span> to fix</p>
+          <p><span id="cTime" class="num">0s</span></p>
+        </div>
+        <ol id="feed" class="feed" aria-label="Live results"></ol>
+        <button id="cancel" type="button" class="ghost stop">Stop and show results so far</button>
+      </section>
+
+      <section id="result" class="result" hidden aria-live="polite">
+        <h1 id="resLabel" tabindex="-1">–</h1>
+        <p id="resSite" class="site-line"></p>
+        <p id="resLine" class="lede"></p>
+        <p id="delta" class="delta" hidden></p>
+        <div class="actions">
+          <a id="openReport" class="go" target="_blank" rel="noopener">Open full report</a>
+          <button id="again" type="button" class="ghost">Run again</button>
+          <button id="newTest" type="button" class="link">Test something else</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="resultMore" class="detail" hidden>
+      <div class="parts" id="parts"></div>
+      <p id="loginNote" class="login-note" hidden></p>
+      <h2 id="fixTitle">Fix these first</h2>
+      <ol id="fix" class="fix"></ol>
+      <p id="allGood" class="good" hidden>Nothing to fix. Every check passed.</p>
+      <ul id="warnings" class="warnings"></ul>
+    </div>
+
+    <aside class="dial" aria-label="Health score gauge">
+      <div id="gauge" class="gauge idle" role="img" aria-label="No reading yet"></div>
+      <p id="gaugeCaption" class="gauge-caption">No reading yet</p>
+    </aside>
+  </div>
+
+  <section class="history" id="historySec" aria-labelledby="histTitle" hidden>
+    <h2 id="histTitle">Your sites</h2>
+    <p id="histEmpty" class="muted">Every run is kept here, so you can watch each site's score climb as you fix things.</p>
+    <ol id="history" class="sites"></ol>
+  </section>
+</main>
+<footer class="foot"><span id="ver"></span> <span id="home"></span></footer>
+</body>
+</html>

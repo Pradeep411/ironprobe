@@ -1,0 +1,12 @@
+{
+  "name": "ironprobe",
+  "owner": { "name": "IronProbe" },
+  "metadata": { "description": "IronProbe: local-first testing agent for Claude Code", "version": "0.1.0" },
+  "plugins": [
+    {
+      "name": "ironprobe",
+      "source": "./plugin",
+      "description": "AI testing agent: writes, runs, triages and heals cross-browser UI, API, accessibility, performance, load and crawl tests with one chart-rich report."
+    }
+  ]
+}

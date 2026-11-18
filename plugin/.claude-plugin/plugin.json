@@ -1,0 +1,6 @@
+{
+  "name": "ironprobe",
+  "version": "0.1.0",
+  "description": "AI testing agent: writes, runs, triages and heals cross-browser UI, API, accessibility, performance, load and crawl tests with one chart-rich report.",
+  "license": "MIT"
+}

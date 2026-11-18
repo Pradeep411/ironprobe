@@ -1,0 +1,60 @@
+name: Demo API
+tests:
+  - name: Health check
+    request: { method: GET, url: /api/health }
+    expect:
+      status: 200
+      maxMs: 300
+      body: { "$.ok": true }
+
+  - name: Login returns a token
+    request:
+      method: POST
+      url: /api/login
+      json: { user: demo, pass: "{{env.DEMO_PASS}}" }
+    expect:
+      status: 200
+      headers: { content-type: "/json/" }
+      body:
+        "$.token": { exists: true, type: string }
+        "$.user.name": demo
+      schema:
+        type: object
+        required: [token, user]
+    extract: { token: "$.token" }
+
+  - name: List items (uses token from login)
+    request:
+      method: GET
+      url: /api/items
+      headers: { Authorization: "Bearer {{token}}" }
+    expect:
+      status: 200
+      body:
+        "$.items": { type: array }
+        "$.count": { gte: 1 }
+
+  - name: Create item
+    request:
+      method: POST
+      url: /api/items
+      headers: { Authorization: "Bearer {{token}}" }
+      json: { name: "Test {{$timestamp}}" }
+    expect:
+      status: 201
+      body: { "$.id": { type: number } }
+
+  - name: Missing item returns 404
+    request:
+      method: GET
+      url: /api/items/99
+      headers: { Authorization: "Bearer {{token}}" }
+    expect: { status: 404 }
+
+  - name: Rejects requests without a token
+    request: { method: GET, url: /api/items }
+    expect: { status: 401 }
+
+  - name: Slow endpoint within budget
+    request: { method: GET, url: /api/slow }
+    expect: { status: 200, maxMs: 400 }
